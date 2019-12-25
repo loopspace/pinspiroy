@@ -36,8 +36,7 @@ STYLUS_DELAY = 12
 msc = 1
 #specify capabilities for a virtual device
 #one for each device:
-#pen/pad, trackpad, and buttons
-#note: I've chosen to include trackpad gestures with the buttons based on how they're reported over USB
+#pen/pad, and buttons
 
 #pressure sensitive pen tablet area with 2 stylus buttons and no eraser
 cap_pen = {
@@ -47,14 +46,6 @@ cap_pen = {
 		(ecodes.ABS_Y, AbsInfo(0,0,PEN_MAX_Y,0,0,5080)),
 		(ecodes.ABS_PRESSURE, AbsInfo(0,0,PEN_MAX_Z,0,0,0)),],
 	ecodes.EV_MSC: [ecodes.MSC_SCAN], #not sure why, but it appears to be needed
-	}
-
-#trackpad specs
-cap_track = {
-	ecodes.EV_KEY: [ecodes.BTN_LEFT, ecodes.BTN_RIGHT, ecodes.BTN_MIDDLE],
-	ecodes.EV_ABS: [
-		(ecodes.ABS_X, AbsInfo(0,0,PEN_MAX_X,0,0,0)), # same max as pen surface
-		(ecodes.ABS_Y, AbsInfo(0,0,31620,0,0,0)),],
 	}
 
 #buttons must be defined in the same sequential order as in the Linux specs
@@ -74,7 +65,6 @@ cap_btn = {
 
 # create our 3 virtual devices
 vpen 	= UInput(cap_pen, 	name="pinspiroy-pen", 		version=0x3)
-vtrack 	= UInput(cap_track, name="pinspiroy-trackpad", 	version=0x4)
 vbtn	= UInput(cap_btn, 	name="pinspiroy-button", 	version=0x5)
 
 time.sleep(0.1) # needed due to some xserver feature 
@@ -86,27 +76,6 @@ def id_btn(data):
 		btn_switch_LH[btn](vbtn)
 	else:
 		btn_switch[btn](vbtn)
-	
-def id_gst(data):
-	if data[4] == 24 or data[4] == 25:
-		print('key error: ' + str(data[4]))
-	elif g.LEFT_HANDED:
-		gst_switch_LH[data[4]](vbtn)
-	else:
-		gst_switch[data[4]](vbtn)
-
-def id_trk(data):
-	if g.TRACKPAD_ENABLED:
-		x = data[3]*256 + data[2]
-		y = data[5]*256 + data[4]
-		if g.LEFT_HANDED:	
-			x = PEN_MAX_X-x
-			y = PEN_MAX_Y-y
-		x = int(math.floor(x*x_scale+x_offset))
-		y = int(math.floor(y*y_scale+y_offset))
-		vtrack.write(ecodes.EV_ABS, ecodes.ABS_X, x)
-		vtrack.write(ecodes.EV_ABS, ecodes.ABS_Y, y)
-		vtrack.syn()
 
 def pressure_curve(z):
 	z = z/g.FULL_PRESSURE
@@ -168,27 +137,9 @@ def id_pen(data):
 
 	vpen.syn() #sync all inputs together
 
-def gst_tap1(whatever): #single finger tap
-	if g.TRACKPAD_ENABLED:
-		vtrack.write(ecodes.EV_KEY, ecodes.BTN_LEFT, 1)
-		vtrack.write(ecodes.EV_KEY, ecodes.BTN_LEFT, 0)
-		vtrack.syn()
-def gst_tap2(whatever): #single finger tap
-	if g.TRACKPAD_ENABLED:
-		vtrack.write(ecodes.EV_KEY, ecodes.BTN_RIGHT, 1)
-		vtrack.write(ecodes.EV_KEY, ecodes.BTN_RIGHT, 0)
-		vtrack.syn()
-def gst_tap3(whatever): #single finger tap
-	if g.TRACKPAD_ENABLED:
-		vtrack.write(ecodes.EV_KEY, ecodes.BTN_MIDDLE, 1)
-		vtrack.write(ecodes.EV_KEY, ecodes.BTN_MIDDLE, 0)
-		vtrack.syn()
-
 # switch to handle input types
 input_switch = {
 	224:id_btn, #buttonpad 
-	225:id_gst, #trackpad gestures
-	144:id_trk, #trackpad movement
 	129:id_pen, #stylus down
 	128:id_pen, #stylus up
 	130:id_pen, #stylus button 1
@@ -229,58 +180,6 @@ btn_switch_LH = {
 
 	0 :g.btn0, #button released
 }
-
-# switch to handle gesture types
-gst_switch = {
-	#2 fingers
-	18:g.gst1, 	#left
-	19:g.gst2, 	#right
-	20:g.gst3, 	#up
- 	21:g.gst4, 	#down
-
- 	# 3 fingers
- 	36:g.gst5, 	#left
-	37:g.gst6, 	#right
-	34:g.gst7, 	#up
- 	35:g.gst8, 	#down
-
- 	# 2 finger pinch
- 	22:g.gst9, 	# expand/pinch out
- 	23:g.gst10, 	# pinch in 
-
- 	1 :gst_tap1, #single finger tap
- 	17:gst_tap2, #2 finger tap
- 	33:gst_tap3, #3 finger tap
- 	0 :g.gst0, #any gesture release
-
-}
-
-#reverse gesture axes for LH setting
-gst_switch_LH = {
-	#2 fingers
-	19:g.gst1, 	#left
-	18:g.gst2, 	#right
-	21:g.gst3, 	#up
- 	20:g.gst4, 	#down
-
- 	# 3 fingers
- 	37:g.gst5, 	#left
-	36:g.gst6, 	#right
-	35:g.gst7, 	#up
- 	34:g.gst8, 	#down
-
- 	# 2 finger pinch
- 	22:g.gst9, 	# expand/pinch out
- 	23:g.gst10, 	# pinch in 
-
- 	1 :gst_tap1, #single finger tap
- 	17:gst_tap2, #2 finger tap
- 	33:gst_tap3, #3 finger tap
- 	0 :g.gst0, #any gesture release
-
-}
-
-
 
 # get unidentified huion USB device
 # boilerplate USB data reading from pyusb library
