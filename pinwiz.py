@@ -90,8 +90,8 @@ class PinWiz(gtk.Window):
 		self.dim_box.add(self.dim_ly)
 		self.dim_box.add(self.dim_y)
 
-		self.btn = [0,1,2,3,4,5,6]
-		self.b = [0,1,2,3,4,5,6]
+		self.btn = [0,1,2,3,4,5,6,7,8,9,10,11]
+		self.b = [0,1,2,3,4,5,6,7,8,9,10,11]
 
 		# btn configs
 		lalign = gtk.Alignment(0, 0, 0, 0)
@@ -106,7 +106,7 @@ class PinWiz(gtk.Window):
 		self.b[0].add(self.btn[0][2])
 		self.b[0].add(self.btn[0][3])
 
-		for i in range(1,7):
+		for i in range(1,12):
 			self.btn[i] = [1,2,3,4]
 			self.b[i] = gtk.HBox(True, 3)
 			self.btn[i][0] = gtk.Label("btn"+str(i))
@@ -169,7 +169,7 @@ class PinWiz(gtk.Window):
 
 
 		self.page2 = gtk.VBox(False, 5)
-		for i in range(0,7):
+		for i in range(0,12):
 			self.page2.pack_start(self.b[i], False, False, 3)
 
 		self.page3 = gtk.VBox(False, 5)
@@ -230,7 +230,7 @@ class PinWiz(gtk.Window):
 		conf.write("MONITOR_W = " + str(self.dim_x.get_text()) + "\n")
 		conf.write("MONITOR_H = " + str(self.dim_y.get_text()) + "\n\n")
 
-		for i in range (1,7):
+		for i in range (1,12):
 			conf.write("def btn" + str(i) + "(vbtn):\n")
 			num_keys = 0
 			key = [0,1,2]

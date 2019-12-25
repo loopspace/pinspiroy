@@ -81,10 +81,11 @@ time.sleep(0.1) # needed due to some xserver feature
 
 # input specific functions
 def id_btn(data):
+        btn = data[5]*256 + data[4]
 	if g.LEFT_HANDED:
-		btn_switch_LH[data[4]](vbtn)
+		btn_switch_LH[btn](vbtn)
 	else:
-		btn_switch[data[4]](vbtn)
+		btn_switch[btn](vbtn)
 	
 def id_gst(data):
 	if data[4] == 24 or data[4] == 25:
@@ -192,28 +193,39 @@ input_switch = {
 	128:id_pen, #stylus up
 	130:id_pen, #stylus button 1
 	132:id_pen,	#stylus button 2
+        0:id_pen, #stylus detached
 }
 
 # switch to handle button types
 btn_switch = {
-	1 :g.btn1, #clockwise from top left
-	2 :g.btn2, 
-	4 :g.btn3, 
-	8 :g.btn4, 
-	16:g.btn5, 
-	32:g.btn6, 
+	   1:g.btn1, #top 3 buttons
+	   2:g.btn2, 
+	   4:g.btn3, 
+	   8:g.btn4, #wheel: top
+	  16:g.btn5, # bottom
+       	  32:g.btn6, # centre
+          64:g.btn7, # left
+         128:g.btn8, # right
+         256:g.btn9, #bottom 3 buttons
+         512:g.btn10,
+        1024:g.btn11,
 
 	0 :g.btn0, #button released
 }
 
 # reverse button order for LH setting
 btn_switch_LH = {
-	32:g.btn1, #clockwise from top left
-	16:g.btn2, 
-	8 :g.btn3, 
-	4 :g.btn4, 
-	2 :g.btn5, 
-	1 :g.btn6, 
+	   1:g.btn11, #bottom 3 buttons
+	   2:g.btn10, 
+	   4:g.btn9, 
+	   8:g.btn4, #wheel: bottom
+	  16:g.btn5, # top
+       	  32:g.btn6, # centre
+          64:g.btn7, # right
+         128:g.btn8, # left
+         256:g.btn3, #top 3 buttons
+         512:g.btn2,
+        1024:g.btn1,
 
 	0 :g.btn0, #button released
 }
@@ -272,7 +284,7 @@ gst_switch_LH = {
 
 # get unidentified huion USB device
 # boilerplate USB data reading from pyusb library
-dev = usb.core.find(idVendor=0x256c, idProduct=0x006e)
+dev = usb.core.find(idVendor=0x256c, idProduct=0x006d)
 interface = 0
 endpoint = dev[0][(0,0)][0]
 

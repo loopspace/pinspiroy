@@ -11,7 +11,7 @@ import time
 
 
 #decimal vendor and product values
-dev = usb.core.find(idVendor=0x256c, idProduct=0x006e)
+dev = usb.core.find(idVendor=0x256c, idProduct=0x006d)
 
 
 # first endpoint
