@@ -22,60 +22,45 @@ Then run `#sudo systemd-hwdb update` to apply the changes. (thanks to [KaiJan57 
 ## Usage
 
 ```
-$ sudo python pinspiroy.py [usersettings.py]
+$ sudo python pinspiroy.py
 ```
 
-If no settings file is given it will load the *default.py* file. Custom settings files must be in the repo folder with a .py extension. Superuser privileges are required to read USB traffic.
+It will look for a configuration file, called `.pinspiroy.ini`,
+loading them from the current directory and the user's home directory.
+Finally, it loads `config.ini` from the script directory.
 
+Superuser privileges are required to read USB traffic.
 
 ## Configuration
-Custom configuration can be done via the *pinwiz.py* tool provided. 
-```
-$ python pinwiz.py
-```
-It will export a configuration file to the working folder which can be passed to the pinspiroy script when run. The pinwiz tool is very simple with no error checking for invalid settings, so be careful with your inputs and debug the exported file with a text editor if needed.
 
-Default configuration values are found in default.py. It has settings for rotating axes for left-handed use and disabling the trackpad (I find it gets in the way). Disabling the trackpad does not disable the gesture bindings except for the 'taps'. The pad buttons and gestures are setup to change bindings when rotated also.
-
-Simple pressure curves and thresholds can be set in settings file (see default.py for comments), however I'd recommend using your art programs pressure adjustments instead of these options.
-
-The default bindings are set up with the following for defaults. I've set these to best with Krita for my workflow, so you may need to change them depending on your art program and preferences.
-
-![](https://github.com/dannytaylor/pinspiroy/blob/master/docs/buttons.png)
-
-Buttons clockwise from top left of trackpad:
+The format of the configuration file is:
 
 ```
-button1: left control (hold)	# eyedropper
-button2: E			# eraser tool
-button3: spacebar (hold)	# pan tool
-button4: shift (hold)		# brush resizer
-button5: ctrl + shift + z	# redo
-button6: ctrl + z		# undo
+[Settings]
+LEFT_HANDED = False
+PRESSURE_CURVE = False 
+FULL_PRESSURE = 1.0 
+MONITOR_X = 0
+MONITOR_Y = 0
+MONITOR_W = 1366
+MONITOR_H = 768
+
+[Buttons]
+1: Ctrl+Alt+H
+2: Space
+3: M
+4: Up
+5: Down
+6: Enter
+7: Left
+8: Right
+9: Ctrl+S
+10: Ctrl+Shift+Z
+11: Ctrl+Z
 ```
 
-
-Trackpad gestures:
-```
-Two fingers:
-up/down/left/right: arrow keys
-
-Three fingers:
-up/down:            ctrl + +/-  # zoom in/out 		
-left/right:         ctrl + [/]  # rotate cc/c
-
-Taps:
-one finger:         mouse left
-two fingers:        mouse right
-three fingers:      mouse middle
-
-Pinch in/out:       unbound
-
-```
-
-For multimonitor setups you will need to enter the **screen** offset from the top left to the top left corner of the target **display** as well as the dimensions of the target display. For single monitor setups the offsets are both zero. My monitor setup is shown below as an example
-
-![](https://github.com/dannytaylor/pinspiroy/blob/master/docs/monitors.png)
+The buttons are configured as follows: 1,2,3 are the top three;
+4,5,6,7,8 are the "wheel"; 9,10,11 are the bottom three.
 
 ## Troubleshooting
 This program requires the uinput module to be loaded. Either manually (_sudo modprobe uinput_)
@@ -92,12 +77,10 @@ or automatically on boot; [see the Arch wiki](https://wiki.archlinux.org/index.p
 Still working out some of the problems, but feel free to tweet @ me or open an issue.
 
 ## Thanks and Additional Reading
+- Original code due to [Danny Taylor](https://github.com/dannytaylor)
 - Thanks [@KaiJan57](https://github.com/KaiJan57) for the magic code to get around the Windows VM requirement and also the hwdb.d fix for recent distros.
 - Thanks [@DevinPentecost](https://github.com/DevinPentecost) for general python help
 - [event codes for uinput use can be found here](https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h)
 - [more event code information found here](https://www.kernel.org/doc/Documentation/input/event-codes.txt)
 - [useful tutorial for writing a USB driver with PyUSB](https://www.linuxvoice.com/drive-it-yourself-usb-car-6/)
 - [writing a uinput tablet driver in C](http://gerev.github.io/laptop-cintiq/)
-
-
-![](https://github.com/dannytaylor/pinspiroy/blob/master/docs/spin2.gif)
