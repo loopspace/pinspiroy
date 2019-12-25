@@ -1,8 +1,8 @@
 # pinspiroy - version for h320m
 
 This is a fork of the original pinspiroy project adapted for the [Huion
-Inspiroy H320M]() tablet.
-It was originally designed for the [Huion Inspiroy G10T](https://www.huiontablet.com/g10t.html) (which is now supported in the [DIGImend]() project). Note that this is not a kernel-level driver, it is a user-land implementation that creates virtual devices with uinput to mimic the tablet functionality.
+Inspiroy H320M](https://www.huion.com/pen_tablet/H320M.html) tablet.
+It was originally designed for the [Huion Inspiroy G10T](https://www.huiontablet.com/g10t.html) (which is now supported in the [DIGImend](https://digimend.github.io/) project). Note that this is not a kernel-level driver, it is a user-land implementation that creates virtual devices with uinput to mimic the tablet functionality.
 
 ## Requirements
 - python2.7
