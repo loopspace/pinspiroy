@@ -22,7 +22,7 @@ else:
         print(s)
 
 config = ConfigParser.RawConfigParser()
-config.read([os.path.dirname(os.path.realpath(sys.argv[0])) + '/config.ini',os.path.expanduser('~/.pinspiroy.ini'),'./.pinspiroy.ini'])
+config.read(['/etc/pinspiroy.ini',os.path.dirname(os.path.realpath(sys.argv[0])) + '/config.ini',os.path.expanduser('~/.pinspiroy.ini'),'./.pinspiroy.ini'])
 
 g = {
     'LEFT_HANDED': False,
