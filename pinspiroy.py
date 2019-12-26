@@ -4,9 +4,22 @@ from evdev import UInput, ecodes, events, AbsInfo, util
 import sys,os,imp,time,imp,math
 import usb.core
 import usb.util
-import gtk
 
+import signal
+import argparse
 import ConfigParser
+
+parser = argparse.ArgumentParser(description='Install the Huion Inspiroy H320M handler.')
+parser.add_argument('-q', '--quiet', required=False, action='store_true', help='Suppress output')
+
+args = parser.parse_args()
+
+if args.quiet:
+    def do_output(s):
+        pass
+else:
+    def do_output(s):
+        print(s)
 
 config = ConfigParser.RawConfigParser()
 config.read([os.path.dirname(os.path.realpath(sys.argv[0])) + '/config.ini',os.path.expanduser('~/.pinspiroy.ini'),'./.pinspiroy.ini'])
@@ -15,10 +28,6 @@ g = {
     'LEFT_HANDED': False,
     'PRESSURE_CURVE': False,
     'FULL_PRESSURE': 1.0,
-    'MONITOR_X': 0,
-    'MONITOR_Y': 0,
-    'MONITOR_W': 1920,
-    'MONITOR_H': 1080,
     'BUTTONS': [],
     'RBUTTONS': []
 }
@@ -70,15 +79,6 @@ for b in range(11):
 PEN_MAX_X = 45720
 PEN_MAX_Y = 28580 
 PEN_MAX_Z = 8191 	#pressure
-
-# user specs
-MAX_W = gtk.gdk.screen_width()
-MAX_H = gtk.gdk.screen_height()
-
-x_scale  = g['MONITOR_W']/float(MAX_W)
-x_offset = PEN_MAX_X*g['MONITOR_X']/float(MAX_W)
-y_scale  = g['MONITOR_H']/float(MAX_H)
-y_offset = PEN_MAX_Y*g['MONITOR_Y']/float(MAX_H)
 
 #specify capabilities for a virtual device
 #one for each device:
@@ -179,9 +179,6 @@ def id_pen(data):
 		x = PEN_MAX_X-x
 		y = PEN_MAX_Y-y
 
-	x = int(math.floor(x*x_scale+x_offset))
-	y = int(math.floor(y*y_scale+y_offset))
-
 	vpen.write(ecodes.EV_ABS, ecodes.ABS_X, x)
 	vpen.write(ecodes.EV_ABS, ecodes.ABS_Y, y)
 	vpen.write(ecodes.EV_ABS, ecodes.ABS_PRESSURE, z)
@@ -227,21 +224,30 @@ endpoint = dev[0][(0,0)][0]
 
 try:
 	usb.util.get_string(dev, 0xc8, 1033)
-	print('Graphics tablet enabled.')
+	do_output('Graphics tablet enabled.')
 except:
-	print('')
+	do_output('')
 
 if dev.is_kernel_driver_active(interface) is True:
 	dev.detach_kernel_driver(interface)
 	usb.util.claim_interface(dev, interface)
-	print('interface 0 grabbed')
+	do_output('interface 0 grabbed')
 interface = 1
 if dev.is_kernel_driver_active(interface) is True:
 	dev.detach_kernel_driver(interface)
 	usb.util.claim_interface(dev, interface)
-	print('interface 1 grabbed')
+	do_output('interface 1 grabbed')
 
-print('pinspiroy should be running!')
+do_output('pinspiroy should be running!')
+
+def gracefulExit(signum,frame):
+    do_output("Exiting gracefully")
+    usb.util.release_interface(dev, interface)
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, gracefulExit)
+signal.signal(signal.SIGINT, gracefulExit)
+
 while True:
 	try:
 		# data received as array of [0,255] ints
@@ -257,5 +263,3 @@ while True:
 		data = None
 		if e.args == ('Operation timed out',):
 				continue
-usb.util.release_interface(dev, interface)
-dev.attach_kernel_driver(interface)

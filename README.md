@@ -31,6 +31,37 @@ Finally, it loads `config.ini` from the script directory.
 
 Superuser privileges are required to read USB traffic.
 
+## UDEV Installation
+
+Getting this to run when the tablet is plugged in involves using
+`udev`.  This requires copying the `pinspiroy.py` file and the scripts
+in `udev/` to `/usr/local/bin` and the file `80-huion-h320m.rules` to
+`/etc/udev/rules.d/`.  To use the rules without rebooting, use the
+command `sudo udevadm control --reload`.
+
+There were various hurdles to get this to work!  The first was
+identifying the devices under `udev`.  The second was getting the
+python script to run and stay running.  It turns out that `udev` does
+not allow persistent scripts - it kills absolutely everything that it
+starts.  To circumvent this I used the `at` daemon.
+
+So the sequence of events is:
+
+1. `udev` notices that the device has been plugged in and launches the
+   `huion_added.sh` script.
+2. This script schedules the `huion_launch.sh` script immediately via
+   the `at` daemon.
+3. The `huion_launch.sh` script launches the `pinspiroy.py` script
+   (with the `quiet` flag) and saves its PID to
+   `/var/run/pinspiroy.run`
+4. When the device is unplugged, `udev` runs `huion_remove.sh` which
+   looks in `/var/run/pinspiroy.py` for the PID of the `pinspiroy.py`
+   script and sends it a TERM signal which closes it -- hopefully
+   gracefully.
+
+This meant removing the `gtk` dependency from the original script as
+the display isn't set `pinspiroy.py`.
+
 ## Configuration
 
 The format of the configuration file is:
@@ -40,10 +71,6 @@ The format of the configuration file is:
 LEFT_HANDED = False
 PRESSURE_CURVE = False 
 FULL_PRESSURE = 1.0 
-MONITOR_X = 0
-MONITOR_Y = 0
-MONITOR_W = 1366
-MONITOR_H = 768
 
 [Buttons]
 1: Ctrl+Alt+H

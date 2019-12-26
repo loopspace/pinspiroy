@@ -1,0 +1,2 @@
+SUBSYSTEM=="usb", ACTION=="add", ATTR{idProduct}=="006d", ATTR{idVendor}=="256c", RUN+="/usr/local/bin/huion_added.sh"
+SUBSYSTEM=="usb", ACTION=="remove", ATTRS{idProduct}=="006d", ATTRS{idVendor}=="256c", RUN+="/usr/local/bin/huion_removed.sh"
